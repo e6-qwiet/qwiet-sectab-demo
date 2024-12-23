@@ -11,6 +11,8 @@ on:
 
 permissions:
   security-events: write  # Ensure proper permissions to upload SARIF results
+  id-token: write
+  contents: read
 
 jobs:
   NextGen-Static-Analysis:
