@@ -33,7 +33,7 @@ jobs:
       id: extract_branch
 
     - name: QwietAI preZero Analysis
-      run: ${GITHUB_WORKSPACE}/sl analyze --strict --wait --verbose --app QWIETAIMulti --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }}
+      run: ${GITHUB_WORKSPACE}/sl analyze --strict --wait --verbose --app qwiet-sectab-demo --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }}
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
         SHIFTLEFT_API_HOST: www.shiftleft.io
@@ -54,7 +54,7 @@ jobs:
 
     - name: Run Export Script to Generate SARIF Report
       run: |
-        python3 ${GITHUB_WORKSPACE}/export.py -f sarif -a QWIETAIMulti
+        python3 ${GITHUB_WORKSPACE}/export.py -f sarif -a qwiet-sectab-demo
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
 
