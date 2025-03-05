@@ -36,7 +36,7 @@ jobs:
       id: extract_branch
 
     - name: preZero NextGen Static Analysis
-      run: ${GITHUB_WORKSPACE}/sl analyze --strict --app qwiet-sectab-demo --wait --verbose  --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }}
+      run: ${GITHUB_WORKSPACE}/sl analyze --strict --app qwiet-sectab-demo-gh --wait --verbose  --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }}
       #--container alpine/curl:8.3.0
       #--container 18fgsa/s3-resource
       env:
