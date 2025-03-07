@@ -216,52 +216,72 @@ public class CustomerController {
    * @param request
    * @throws Exception
    */
-  @RequestMapping(value = "/saveSettings", method = RequestMethod.GET)
-  public void saveSettings(HttpServletResponse httpResponse, WebRequest request) throws Exception {
+@RequestMapping(value = "/saveSettings", method = RequestMethod.GET)
+public void saveSettings(HttpServletResponse httpResponse, WebRequest request) throws Exception {
     // "Settings" will be stored in a cookie
     // schema: base64(filename,value1,value2...), md5sum(base64(filename,value1,value2...))
 
-    if (!checkCookie(request)){
-      httpResponse.getOutputStream().println("Error");
-      throw new Exception("cookie is incorrect");
+    if (!checkCookie(request)) {
+        httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Cookie is incorrect");
+        throw new Exception("cookie is incorrect");
     }
 
     String settingsCookie = request.getHeader("Cookie");
     String[] cookie = settingsCookie.split(",");
-	if(cookie.length<2) {
-	  httpResponse.getOutputStream().println("Malformed cookie");
-      throw new Exception("cookie is incorrect");
+    if (cookie.length < 2) {
+        httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Malformed cookie");
+        throw new Exception("cookie is incorrect");
     }
 
-    String base64txt = cookie[0].replace("settings=","");
+    String base64txt = cookie[0].replace("settings=", "");
 
     // Check md5sum
     String cookieMD5sum = cookie[1];
-    String calcMD5Sum = DigestUtils.md5Hex(base64txt);
-	if(!cookieMD5sum.equals(calcMD5Sum))
-    {
-      httpResponse.getOutputStream().println("Wrong md5");
-      throw new Exception("Invalid MD5");
+    String calcMD5Sum = DigestUtils.sha256Hex(base64txt); // Upgraded to SHA-256
+    if (!cookieMD5sum.equals(calcMD5Sum)) {
+        httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Wrong md5");
+        throw new Exception("Invalid MD5");
     }
 
-    // Now we can store on filesystem
-    String[] settings = new String(Base64.getDecoder().decode(base64txt)).split(",");
-	// storage will have ClassPathResource as basepath
-    ClassPathResource cpr = new ClassPathResource("./static/");
-	  File file = new File(cpr.getPath()+settings[0]);
-    if(!file.exists()) {
-      file.getParentFile().mkdirs();
+    // Sanitize the filename
+    Pattern pattern = Pattern.compile("^[a-zA-Z0-9_.\\-]+$");
+    Matcher matcher = pattern.matcher(base64txt);
+    if (!matcher.matches()) {
+        httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid filename");
+        throw new Exception("Invalid filename");
     }
 
-    FileOutputStream fos = new FileOutputStream(file, true);
-    // First entry is the filename -> remove it
-    String[] settingsArr = Arrays.copyOfRange(settings, 1, settings.length);
-    // on setting at a linez
-    fos.write(String.join("\n",settingsArr).getBytes());
-    fos.write(("\n"+cookie[cookie.length-1]).getBytes());
-    fos.close();
-    httpResponse.getOutputStream().println("Settings Saved");
-  }
+    String sanitizedPath = sanitizeFilePath(base64txt);
+    Path sanitizedFilePath = Paths.get(sanitizedPath);
+
+    // Create directories if they do not exist
+    Files.createDirectories(sanitizedFilePath.getParent());
+
+    // Store the settings
+    MultipartFile multipartFile = request.getSession().getAttribute("settingsMultipartFile");
+    if (multipartFile != null && multipartFile.getSize() > 0) {
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            byte[] content = inputStream.readAllBytes();
+            Files.write(sanitizedFilePath, content);
+        } catch (IOException e) {
+            httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error writing file");
+            throw new Exception("Error writing file", e);
+        }
+    }
+
+    httpResponse.setHeader("Set-Cookie", "settings=" + base64txt + ";path=/;secure;httponly;samesite=strict");
+    httpResponse.sendRedirect("/settings-saved");
+}
+
+private boolean checkCookie(WebRequest request) {
+    AntPathRequestMatcher matcher = new AntPathRequestMatcher("/saveSettings", "GET");
+    return matcher.matches();
+}
+
+private String sanitizeFilePath(String rawPath) {
+    return StringEscapeUtils.escapeHtml4(rawPath);
+}
+
 
   /**
    * Debug test for saving and reading a customer
