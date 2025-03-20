@@ -282,6 +282,21 @@ private String sanitizeFilePath(String rawPath) {
     return StringEscapeUtils.escapeHtml4(rawPath);
 }
 
+    }
+
+    httpResponse.setHeader("Set-Cookie", "settings=" + base64txt + ";path=/;secure;httponly;samesite=strict");
+    httpResponse.sendRedirect("/settings-saved");
+}
+
+private boolean checkCookie(WebRequest request) {
+    AntPathRequestMatcher matcher = new AntPathRequestMatcher("/saveSettings", "GET");
+    return matcher.matches();
+}
+
+private String sanitizeFilePath(String rawPath) {
+    return StringEscapeUtils.escapeHtml4(rawPath);
+}
+
 
   /**
    * Debug test for saving and reading a customer
