@@ -1,0 +1,79 @@
+---
+name: Qwiet pre-zero Demo
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+
+jobs:
+  Qwiet-Static-Analysis:
+    runs-on: ubuntu-latest
+    #container: shiftleft/core:latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    # - uses: actions/checkout@v4
+
+    # - name: Download ShiftLeft CLI
+    #   run: |
+    #     curl https://cdn.shiftleft.io/download/sl > ./sl && chmod a+rx ./sl 
+
+    # - name: Run sl analyze 1
+    #   shell: bash
+    #   run: |
+    #     ./sl analyze --verbose --wait --app "${GITHUB_REPOSITORY_OWNER}_${GITHUB_REPOSITORY#*/}" .
+    #   env:
+    #     SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+
+    # - name: Run check-analysis
+    #   shell: bash
+    #   run: |
+    #     ./sl check-analysis --v2 --verbose --app "${GITHUB_REPOSITORY_OWNER}_${GITHUB_REPOSITORY#*/}" --no-build-rules
+    #   env:
+    #     SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}        
+
+    # - name: Checkout repository  # This is necessary to access your code
+    #   uses: actions/checkout@v3
+      
+
+      - uses: elangosenthilnathan/Qwiet-preZero@v6
+        with:
+          shiftleft-access-token: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+          verbose: false # not mandatory
+          importGitHub: true # not mandatory
+        
+    
+    # - name: Run Qwiet AI Scan
+    #   uses: sandy-qwietai/qwietai-actions@main
+    #   env:
+    #     SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+    # - name: Export Sarif Report qwiet ai
+    #   shell: bash
+    #   run: |
+    #     git clone https://github.com/ShiftLeftSecurity/field-integrations report
+    #     #git clone --branch Fix-DuplicateFinding-Export --single-branch https://github.com/ShiftLeftSecurity/field-integrations report
+    #     pip3 install -r report/shiftleft-utils/requirements.txt
+    #     python3 report/shiftleft-utils/export.py --app "${GITHUB_REPOSITORY_OWNER}_${GITHUB_REPOSITORY#*/}" --format "sarif" --report_file report/qwiet-sarif-report.sarif
+    #     chmod -R 777 report
+    #   env:
+    #     SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}        
+
+    # - name: Upload result to GitHub Code Scanning
+    #   uses: github/codeql-action/upload-sarif@v3
+    #   with:
+    #     sarif_file: qwiet-sarif-report-elangosenthilnathan_github_java_demo.sarif  
+    #     category: qwiet-prezero    
+
+    # - name: Create Json Report
+    #   shell: bash
+    #   run: |
+    #     url="https://app.shiftleft.io/api/v4/orgs/eba14690-d605-4f85-b5e3-b2992e9174b0/apps/${{ github.event.repository.name }}/scans/compare?source=tag.branch=${{ github.head_ref }}&target=tag.branch=${{ github.base_ref }}"
+    #     curl -s -X GET -H "Authorization: Bearer ${SHIFTLEFT_ACCESS_TOKEN}" "${url}" -o output.json
+    #     cat output.json
+    #   env:
+    #     SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}    
