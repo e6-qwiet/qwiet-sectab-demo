@@ -17,5 +17,5 @@ jobs:
         shiftleft-access-token: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
         verbose: true
         strict: false
-        wait: false
+        wait: true
         importGitHub: false
