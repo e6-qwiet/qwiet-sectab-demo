@@ -40,12 +40,26 @@ jobs:
     # - name: Checkout repository  # This is necessary to access your code
     #   uses: actions/checkout@v3
       
+      - name: Checkout repository # This is necessary to access your code
+        uses: actions/checkout@v3
 
-      - uses: elangosenthilnathan/Qwiet-preZero@v6
+      - name: Qwiet-AllInOne-Scan
+      # You may pin to the exact commit or the version.
+      # uses: elangosenthilnathan/Qwiet-preZero@29c19b2b8c55db3ec9bf0bc1701a6bd35fa96578
+        uses: elangosenthilnathan/Qwiet-preZero@v0.0.1
         with:
+          # Qwiet preZero Authentication Token
           shiftleft-access-token: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
-          verbose: false # not mandatory
-          importGitHub: true # not mandatory
+          # Regex to exclude path
+          excludeRegex: # optional, default is .*(test|Readme).*$
+          # Enable SARIF report generation and upload (true/false)
+          importGitHub: # optional, default is false
+          # Enable Verbose logging
+          verbose: # optional, default is false
+          # Enable strict mode
+          strict: # optional, default is false
+          # Enable Synchronous mode
+          wait: # optional, default is false
         
     
     # - name: Run Qwiet AI Scan
