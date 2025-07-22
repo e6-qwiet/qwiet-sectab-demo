@@ -18,4 +18,4 @@ jobs:
         verbose: true
         strict: false
         wait: true
-        importGitHub: false
+        importGitHub: true
